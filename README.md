@@ -24,7 +24,9 @@ This solver implements multiple pathfinding algorithms and heuristics to find th
 3. Build using Maven: `mvn clean package` (if using Maven)
 4. Alternatively, compile the Java files manually:
    ```
+   cd bin
    mkdir -p bin
+   cd ..
    javac -d bin src/*.java src/algorithm/*.java src/model/*.java src/utility/*.java
    ```
 
