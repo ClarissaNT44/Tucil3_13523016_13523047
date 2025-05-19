@@ -19,7 +19,7 @@ import utility.FileHandler;
 public class Main {
     public static void main(String[] args) {
         System.out.println("============================================");
-        System.out.println("        RUSH HOUR PUZZLE SOLVER");
+        System.out.println("      *** RUSH HOUR PUZZLE SOLVER ***");
         System.out.println("============================================");
 
         // Ask user for the puzzle file
@@ -89,13 +89,14 @@ public class Main {
             } else {
                 System.out.println("Solution path contains " + solution.size() + " moves:");
                 
+                // List to store all board states
+                List<Board> boardStates = new ArrayList<>();
+                boardStates.add(board.copy());
+                
                 // Apply each move to the board and display steps
                 Board currentBoard = board.copy();
                 System.out.println("\nInitial state:");
                 FileHandler.printBoard(currentBoard, ' ');
-                
-                // List to store all board states
-                List<Board> boardStates = new ArrayList<>();
 
                 // Display each step
                 System.out.println("\nStep by step solution:");
