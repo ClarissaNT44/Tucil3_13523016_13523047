@@ -25,7 +25,7 @@ This solver implements multiple pathfinding algorithms and heuristics to find th
 4. Alternatively, compile the Java files manually:
    ```
    mkdir -p bin
-   javac -d bin src/main/*.java src/main/algorithm/*.java src/main/model/*.java src/main/util/*.java
+   javac -d bin src/*.java src/algorithm/*.java src/model/*.java src/utility/*.java
    ```
 
 ## Usage
@@ -34,7 +34,7 @@ This solver implements multiple pathfinding algorithms and heuristics to find th
 1. Navigate to the project directory
 2. Run the application:
    ```
-   java -cp bin main.RushHourSolver
+   java -cp bin Main
    ```
    Or if using Maven:
    ```
