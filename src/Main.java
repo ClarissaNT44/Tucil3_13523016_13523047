@@ -1,12 +1,17 @@
-import algorithm.*;
-import model.*;
-import utility.*;
-
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+
+import algorithm.AStar;
+import algorithm.GreedyBestFirst;
+import algorithm.Heuristic;
+import algorithm.HeuristicFactory;
+import algorithm.Pathfinder;
+import algorithm.UCS;
+import model.Board;
+import model.Move;
+import utility.FileHandler;
 
 /**
  * Main class for the Rush Hour puzzle solver application.
@@ -28,7 +33,7 @@ public class Main {
             
             // Display the initial board
             System.out.println("\nInitial Board:");
-            FileHandler.printBoard(board);
+            FileHandler.printBoard(board, ' ');
             
             // Ask user for the algorithm choice
             System.out.println("\nSelect the search algorithm:");
@@ -50,7 +55,8 @@ public class Main {
                 System.out.print("Enter your choice (1-3): ");
                 heuristicChoice = scanner.nextInt();
             }
-            
+            scanner.nextLine(); 
+
             // Create the selected pathfinder
             long startTime = System.currentTimeMillis();
             switch (algorithmChoice) {
@@ -86,15 +92,19 @@ public class Main {
                 // Apply each move to the board and display steps
                 Board currentBoard = board.copy();
                 System.out.println("\nInitial state:");
-                FileHandler.printBoard(currentBoard);
+                FileHandler.printBoard(currentBoard, ' ');
                 
+                // List to store all board states
+                List<Board> boardStates = new ArrayList<>();
+
                 // Display each step
                 System.out.println("\nStep by step solution:");
                 for (int i = 0; i < solution.size(); i++) {
                     Move move = solution.get(i);
                     System.out.println("\nStep " + (i + 1) + ": " + move);
                     currentBoard.movePiece(move.getPieceId(), move.getDirection(), move.getSteps());
-                    FileHandler.printBoard(currentBoard);
+                    FileHandler.printBoard(currentBoard, move.getPieceId());
+                    boardStates.add(currentBoard.copy());
                 }
                 
                 System.out.println("\n============================================");
@@ -103,8 +113,16 @@ public class Main {
                 System.out.println("Path length: " + solution.size() + " moves");
                 System.out.println("Nodes visited: " + pathfinder.getNodesVisited());
                 System.out.println("Execution time: " + (endTime - startTime) + " ms");
+
+                System.out.print("\nEnter the saving file path (must end with .txt): ");
+                String saveFilePath = scanner.nextLine();
+                try {
+                    FileHandler.saveSolutionToFile(solution, boardStates, saveFilePath, endTime - startTime, pathfinder.getNodesVisited());
+                    System.out.println("Solution saved to " + saveFilePath);
+                } catch (IOException e) {
+                    System.err.println("Error saving the solution: " + e.getMessage());
+                }
             }
-            
         } catch (IOException e) {
             System.err.println("Error reading the puzzle file: " + e.getMessage());
         } catch (Exception e) {
