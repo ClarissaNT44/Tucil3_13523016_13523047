@@ -217,11 +217,6 @@ public class FileHandler {
     }
 
     public static void saveSolutionToFile(List<Move> solution, List<Board> boardStates, String filePath, long timeTaken, int nodesVisited) throws IOException {
-        // Ensure the file has .txt extension
-        if (!filePath.endsWith(".txt")) {
-            throw new IOException("Invalid file format. The file must be a .txt file.");
-        }
-        
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
             writer.write("============================================");
             writer.write("\n      *** RUSH HOUR PUZZLE SOLVER ***");
@@ -229,7 +224,7 @@ public class FileHandler {
             
             // Write initial state
             writer.write("\n\nInitial Board:\n");
-            writeBoard(writer, boardStates.get(0), ' ');
+            writeBoard(writer, boardStates.get(0));
             
             writer.write("\n============================================");
             writer.write("\n              SOLUTION FOUND");
@@ -237,7 +232,6 @@ public class FileHandler {
             
             if (solution.isEmpty()) {
                 writer.write("\nNo solution found!");
-                return;
             } else {
                 writer.write("\nSolution path contains " + solution.size() + " moves:\n");
             }
@@ -249,7 +243,7 @@ public class FileHandler {
                 writer.write("\nStep " + (i + 1) + ": " + move + "\n");
                 
                 // Write the board state after this move
-                writeBoard(writer, boardStates.get(i + 1), move.getPieceId());
+                writeBoard(writer, boardStates.get(i + 1));
             }
             
             writer.write("\n============================================");
@@ -262,8 +256,8 @@ public class FileHandler {
         }
     }
 
-    // Helper method to write a board state to the file (mimics printBoard)
-    private static void writeBoard(BufferedWriter writer, Board board, char movingPieceId) throws IOException {
+    // Helper method to write a board state
+    private static void writeBoard(BufferedWriter writer, Board board) throws IOException {
         int height = board.getHeight();
         int width = board.getWidth();
         int exitRow = board.getExitRow();
@@ -292,19 +286,15 @@ public class FileHandler {
             // Cell contents
             for (int c = 0; c < width; c++) {
                 char cell = board.getCell(r, c);
+                writer.write(" " + cell + " ");
                 
-                // In file we can't use colors, but we can indicate the moving piece with an asterisk
-                if (cell == movingPieceId && movingPieceId != ' ') {
-                    writer.write("*" + cell + "*");
-                } else if (cell == 'P') {
-                    writer.write(" " + cell + " ");  // Primary piece
-                } else {
-                    writer.write(" " + cell + " ");
-                }
-                
-                // Right border or exit
-                if (c == width - 1 && exitRow == r && exitCol == width) {
-                    writer.write(" ");  // Exit at right side
+                // Right border
+                if (c == width - 1) {
+                    if (exitCol == width && exitRow == r) {
+                        writer.write(" ");  // Exit at right side
+                    } else {
+                        writer.write("|");
+                    }
                 } else {
                     writer.write("|");
                 }

@@ -123,4 +123,7 @@ public class ControlPanel extends JPanel {
         prevButton.setEnabled(!isPlaying);
         nextButton.setEnabled(!isPlaying);
     }
+    public void add(JButton button) {
+        super.add(button);
+    }
 }
