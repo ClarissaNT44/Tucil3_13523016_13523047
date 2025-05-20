@@ -52,18 +52,16 @@ public class MainFrame extends JFrame {
         setSize(900, 700);
         setLocationRelativeTo(null);
 
-        // Inisialisasi tombol Save Solution
-        saveButton = new JButton("Save Solution");
-        saveButton.setEnabled(false);
-        saveButton.addActionListener(e -> onSaveClicked());
+        // // Inisialisasi tombol Save Solution
+        // saveButton = new JButton("Save Solution");
+        // saveButton.setEnabled(false);
+        // saveButton.addActionListener(e -> onSaveClicked());
         
         // Inisialisasi panel kontrol dengan callback methods
         controlPanel = new ControlPanel(this::onBrowseClicked, this::onSolveClicked,
-                this::onPlayClicked, this::onPauseClicked,
-                this::onPrevClicked, this::onNextClicked);
-        
-        // Tambahkan tombol Save ke panel kontrol
-        controlPanel.add(saveButton);
+        this::onPlayClicked, this::onPauseClicked,
+        this::onPrevClicked, this::onNextClicked,
+        this::onSaveClicked);
 
         // Inisialisasi panel board dan status
         boardPanel = new BoardPanel();
@@ -178,7 +176,7 @@ public class MainFrame extends JFrame {
         // Update status dan disable controls selama pencarian
         statusPanel.setStatus("Solving...");
         controlPanel.setControlsEnabled(false);
-        saveButton.setEnabled(false);
+        controlPanel.setSaveEnabled(false);
         
         // Jalankan pencarian solusi di background thread
         SwingWorker<Void, Void> worker = new SwingWorker<>() {
@@ -213,7 +211,7 @@ public class MainFrame extends JFrame {
                         boardPanel.setBoard(boardStates.get(0));
                         controlPanel.setControlsEnabled(true);
                         controlPanel.setPlaying(false);
-                        saveButton.setEnabled(true);  // Aktifkan tombol save
+                        controlPanel.setSaveEnabled(true);  // Aktifkan tombol save
                     }
                 } catch (Exception e) {
                     JOptionPane.showMessageDialog(MainFrame.this, "Error during solving:\n" + e.getMessage(),
@@ -284,7 +282,7 @@ public class MainFrame extends JFrame {
         boardStates = null;
         controlPanel.setControlsEnabled(true);
         controlPanel.setPlaying(false);
-        saveButton.setEnabled(false); // Disable tombol save
+        controlPanel.setSaveEnabled(false);
         if (currentBoard != null) {
             boardPanel.setBoard(currentBoard);
         } else {

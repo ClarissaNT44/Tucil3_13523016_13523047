@@ -22,6 +22,7 @@ public class ControlPanel extends JPanel {
     private JButton pauseButton;
     private JButton prevButton;
     private JButton nextButton;
+    private JButton saveButton;
 
     private Consumer<Void> browseAction;
     private Consumer<Void> solveAction;
@@ -29,16 +30,19 @@ public class ControlPanel extends JPanel {
     private Consumer<Void> pauseAction;
     private Consumer<Void> prevAction;
     private Consumer<Void> nextAction;
+    private Consumer<Void> saveAction;
 
     public ControlPanel(Runnable browseCallback, Runnable solveCallback,
                         Runnable playCallback, Runnable pauseCallback,
-                        Runnable prevCallback, Runnable nextCallback) {
+                        Runnable prevCallback, Runnable nextCallback,
+                        Runnable saveCallback) {
         this.browseAction = v -> browseCallback.run();
         this.solveAction = v -> solveCallback.run();
         this.playAction = v -> playCallback.run();
         this.pauseAction = v -> pauseCallback.run();
         this.prevAction = v -> prevCallback.run();
         this.nextAction = v -> nextCallback.run();
+        this.saveAction = v -> saveCallback.run();
         initComponents();
         layoutComponents();
     }
@@ -77,6 +81,9 @@ public class ControlPanel extends JPanel {
         nextButton = new JButton("Next");
         nextButton.setEnabled(false);
         nextButton.addActionListener(e -> nextAction.accept(null));
+        saveButton = new JButton("Save Solution");
+        saveButton.setEnabled(false);
+        saveButton.addActionListener(e -> saveAction.accept(null));
     }
 
     private void layoutComponents() {
@@ -93,6 +100,7 @@ public class ControlPanel extends JPanel {
         add(pauseButton);
         add(prevButton);
         add(nextButton);
+        add(saveButton);
     }
 
     public void setFilePath(String path) {
@@ -113,6 +121,7 @@ public class ControlPanel extends JPanel {
         pauseButton.setEnabled(false);
         prevButton.setEnabled(enabled);
         nextButton.setEnabled(enabled);
+        saveButton.setEnabled(enabled && hasSolution());
     }
 
     public void setPlaying(boolean isPlaying) {
@@ -123,6 +132,15 @@ public class ControlPanel extends JPanel {
         prevButton.setEnabled(!isPlaying);
         nextButton.setEnabled(!isPlaying);
     }
+
+    public void setSaveEnabled(boolean enabled) {
+        saveButton.setEnabled(enabled);
+    }
+
+    private boolean hasSolution() {
+        return true;
+    }
+
     public void add(JButton button) {
         super.add(button);
     }
