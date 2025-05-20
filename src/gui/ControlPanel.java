@@ -93,9 +93,7 @@ public class ControlPanel extends JPanel {
         add(pauseButton);
         add(prevButton);
         add(nextButton);
-        if (saveButton != null) {
-            add(saveButton);
-        }
+        
     }
 
     public void setFilePath(String path) {
