@@ -16,20 +16,14 @@ This solver implements multiple pathfinding algorithms and heuristics to find th
 
 ### Prerequisites
 - Java Development Kit (JDK) 8 or higher
-- Maven (optional, for building from source)
 
 ### Building from Source
 1. Clone this repository
 2. Navigate to the project directory
-3. Build using Maven: `mvn clean package` (if using Maven)
-4. Alternatively, compile the Java files manually:
+3. Compile Java files:
    ```
-   mkdir -p bin
-   javac -d bin src/main/*.java src/main/algorithm/*.java src/main/model/*.java src/main/util/*.java
-   ```
-5. Compile the Java files with GUI
-   ```
-   javac -d bin src/*.java src/algorithm/*.java src/model/*.java src/utility/*.java src/gui/*.java
+   cd src
+   javac -d ../bin Main.java 
    ```
 ## Usage
 
@@ -37,22 +31,24 @@ This solver implements multiple pathfinding algorithms and heuristics to find th
 1. Navigate to the project directory
 2. Run the application:
    ```
-   java -cp bin main.RushHourSolver
-   ```
-   Or if using Maven:
-   ```
-   java -jar target/rush-hour-solver.jar
-   ```
-3. Running the program with GUI after compile
-   ```
-   java -cp bin gui.MainFrame
+   cd bin
+   java Main
    ```
 3. Follow the prompts to:
-   - Enter the puzzle file path
-   - Select the pathfinding algorithm
-   - Select the heuristic (for Greedy Best First Search and A*)
-   - View the solution steps
-   - Optionally save the solution to a file
+   1. Browse to select a puzzle file
+   2. Choose an algorithm:
+      - Uniform Cost Search (UCS)
+      - Greedy Best First Search (GBFS)
+      - A* Search
+   3. If using GBFS or A*, select a heuristic:
+      - Distance to Exit
+      - Blocking Vehicles
+      - Combined (Distance + Blocking Vehicles)
+   4. Click "Solve" to find a solution
+   5. Use the controls to:
+      - Play/Pause the solution animation
+      - Step forward/backward through solution states
+      - Save the solution to a file
 
 ### Input File Format
 The program reads puzzle configurations from text files with the following format:
