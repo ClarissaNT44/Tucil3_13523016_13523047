@@ -3,16 +3,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-import algorithm.AStar;
-import algorithm.GreedyBestFirst;
-import algorithm.Heuristic;
-import algorithm.HeuristicFactory;
-import algorithm.Pathfinder;
-import algorithm.UCS;
-import model.Board;
-import model.Move;
-import utility.FileHandler;
-
 import algorithm.*;
 import model.*;
 import utility.*;
