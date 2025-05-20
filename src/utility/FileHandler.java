@@ -224,63 +224,103 @@ public class FileHandler {
         
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
             writer.write("============================================");
+            writer.write("\n      *** RUSH HOUR PUZZLE SOLVER ***");
+            writer.write("\n============================================");
+            
+            // Write initial state
+            writer.write("\n\nInitial Board:\n");
+            writeBoard(writer, boardStates.get(0), ' ');
+            
+            writer.write("\n============================================");
             writer.write("\n              SOLUTION FOUND");
             writer.write("\n============================================");
+            
             if (solution.isEmpty()) {
-                writer.write("\nNo solution found.");
+                writer.write("\nNo solution found!");
                 return;
             } else {
-                writer.write("\nSolution path contains " + solution.size() + " moves.\n");
+                writer.write("\nSolution path contains " + solution.size() + " moves:\n");
             }
+            
             // Write the solution steps
-            writer.write("Step by step solution:\n");
+            writer.write("\nStep by step solution:\n");
             for (int i = 0; i < solution.size(); i++) {
                 Move move = solution.get(i);
                 writer.write("\nStep " + (i + 1) + ": " + move + "\n");
-                Board currentBoard = boardStates.get(i);
-                int height = currentBoard.getHeight();
-                int width = currentBoard.getWidth();
-                int exitRow = currentBoard.getExitRow();
-                int exitCol = currentBoard.getExitCol();
                 
-                // Print top border
-                writer.write("+");
-                for (int c = 0; c < width; c++) {
-                    writer.write("---+");
-                }
-                writer.write("\n");
-
-                // Print board rows
-                for (int r = 0; r < height; r++) {
-                    writer.write("|");
-                    for (int c = 0; c < width; c++) {
-                        char cell = currentBoard.getCell(r, c);
-                        writer.write(" " + cell + " ");
-                        // Right border - only leave it open if this is the exit position
-                        if (c == width - 1 && r == exitRow) {
-                            writer.write(" ");
-                        } else {
-                            writer.write("|");
-                        }
-                    }
-                    writer.write("\n");
-                    // Print row separator (bottom border for this row)
-                    writer.write("+");
-                    for (int c = 0; c < width; c++) {
-                        writer.write("---+");
-                    }
-                    writer.write("\n");
-                }
+                // Write the board state after this move
+                writeBoard(writer, boardStates.get(i + 1), move.getPieceId());
             }
             
-            // Write the statistics in the format you requested
-            writer.write("\n============================================\n");
-            writer.write("               STATISTICS\n");
-            writer.write("============================================\n");
-            writer.write("Path length: " + solution.size() + " moves\n");
-            writer.write("Nodes visited: " + nodesVisited + "\n");
-            writer.write("Execution time: " + timeTaken + " ms\n");
-            writer.write("============================================\n");
+            writer.write("\n============================================");
+            writer.write("\n               STATISTICS");
+            writer.write("\n============================================");
+            writer.write("\nPath length: " + solution.size() + " moves");
+            writer.write("\nNodes visited: " + nodesVisited);
+            writer.write("\nExecution time: " + timeTaken + " ms");
+            writer.write("\n============================================");
+        }
+    }
+
+    // Helper method to write a board state to the file (mimics printBoard)
+    private static void writeBoard(BufferedWriter writer, Board board, char movingPieceId) throws IOException {
+        int height = board.getHeight();
+        int width = board.getWidth();
+        int exitRow = board.getExitRow();
+        int exitCol = board.getExitCol();
+        
+        // Print top border with possible exit at top
+        writer.write("+");
+        for (int c = 0; c < width; c++) {
+            if (exitRow == -1 && exitCol == c) {
+                writer.write("   +"); // Exit at top
+            } else {
+                writer.write("---+");
+            }
+        }
+        writer.write("\n");
+        
+        // Print board rows
+        for (int r = 0; r < height; r++) {
+            // Left border with possible exit at left
+            if (exitCol == -1 && exitRow == r) {
+                writer.write(" ");  // Exit at left side
+            } else {
+                writer.write("|");
+            }
+            
+            // Cell contents
+            for (int c = 0; c < width; c++) {
+                char cell = board.getCell(r, c);
+                
+                // In file we can't use colors, but we can indicate the moving piece with an asterisk
+                if (cell == movingPieceId && movingPieceId != ' ') {
+                    writer.write("*" + cell + "*");
+                } else if (cell == 'P') {
+                    writer.write(" " + cell + " ");  // Primary piece
+                } else {
+                    writer.write(" " + cell + " ");
+                }
+                
+                // Right border or exit
+                if (c == width - 1 && exitRow == r && exitCol == width) {
+                    writer.write(" ");  // Exit at right side
+                } else {
+                    writer.write("|");
+                }
+            }
+            writer.write("\n");
+            
+            // Print row separator with possible exit at bottom
+            writer.write("+");
+            for (int c = 0; c < width; c++) {
+                if (r == height - 1 && exitRow == height && exitCol == c) {
+                    writer.write("   +"); // Exit at bottom
+                } else {
+                    writer.write("---+");
+                }
+            }
+            writer.write("\n");
         }
     }
 }

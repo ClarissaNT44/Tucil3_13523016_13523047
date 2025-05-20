@@ -2,6 +2,10 @@
 import algorithm.*;
 import model.*;
 import utility.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
@@ -18,6 +22,8 @@ public class Main {
                         
             System.out.println("\nInitial Board:");
             FileHandler.printBoard(board, ' ');
+            List<Board> boardStates = new ArrayList<>();
+            boardStates.add(board.copy()); 
             
             System.out.println("\nSelect the search algorithm:");
             System.out.println("1. Uniform Cost Search (UCS)");
@@ -69,7 +75,7 @@ public class Main {
                 
                 Board currentBoard = board.copy();
                 System.out.println("\nInitial state:");
-                FileHandler.printBoard(currentBoard);
+                FileHandler.printBoard(currentBoard, ' ');
 
                 System.out.println("\nStep by step solution:");
                 for (int i = 0; i < solution.size(); i++) {
@@ -87,6 +93,7 @@ public class Main {
                 System.out.println("Nodes visited: " + pathfinder.getNodesVisited());
                 System.out.println("Execution time: " + (endTime - startTime) + " ms");
 
+                scanner.nextLine(); 
                 System.out.print("\nEnter the saving file path (must end with .txt): ");
                 String saveFilePath = scanner.nextLine();
                 try {
