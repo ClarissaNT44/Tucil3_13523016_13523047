@@ -44,17 +44,14 @@ public class MainFrame extends JFrame {
         setLayout(new BorderLayout());
         setSize(900, 700);
         setLocationRelativeTo(null);
-
         controlPanel = new ControlPanel(this::onBrowseClicked, this::onSolveClicked,
                 this::onPlayClicked, this::onPauseClicked,
                 this::onPrevClicked, this::onNextClicked);
         boardPanel = new BoardPanel();
         statusPanel = new StatusPanel();
-
         add(controlPanel, BorderLayout.NORTH);
         add(new JScrollPane(boardPanel), BorderLayout.CENTER);
         add(statusPanel, BorderLayout.SOUTH);
-
         animationTimer = new Timer(800, e -> {
             if (animationStep < boardStates.size() - 1) {
                 animationStep++;
@@ -91,10 +88,8 @@ public class MainFrame extends JFrame {
                     "Warning", JOptionPane.WARNING_MESSAGE);
             return;
         }
-
         int algoIndex = controlPanel.getSelectedAlgorithmIndex();
         int heuristicIndex = controlPanel.getSelectedHeuristicIndex() + 1;
-
         switch (algoIndex) {
             case 0:
                 pathfinder = new UCS();
@@ -110,16 +105,14 @@ public class MainFrame extends JFrame {
                         "Error", JOptionPane.ERROR_MESSAGE);
                 return;
         }
-
         statusPanel.setStatus("Solving...");
         controlPanel.setControlsEnabled(false);
-
         SwingWorker<Void, Void> worker = new SwingWorker<>() {
             List<Move> solution;
             List<model.State> states;
             long startTime;
             long endTime;
-
+            
             @Override
             protected Void doInBackground() {
                 startTime = System.currentTimeMillis();

@@ -1,12 +1,19 @@
 package gui;
 
-import model.Board;
-import model.Piece;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Stroke;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.swing.JPanel;
+
+import model.Board;
 
 /**
  * Panel untuk menampilkan papan puzzle Rush Hour sebagai grid.
@@ -45,16 +52,13 @@ public class BoardPanel extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         if (board == null) return;
-
         int width = board.getWidth();
         int height = board.getHeight();
-
         // Draw cells
         for (int r = 0; r < height; r++) {
             for (int c = 0; c < width; c++) {
                 char cellChar = board.getCell(r, c);
                 Color bgColor = Color.LIGHT_GRAY;
-
                 if (cellChar == '.') {
                     bgColor = Color.WHITE;
                 } else if (cellChar == 'P') {
@@ -62,14 +66,11 @@ public class BoardPanel extends JPanel {
                 } else if (pieceColors.containsKey(cellChar)) {
                     bgColor = pieceColors.get(cellChar);
                 }
-
                 g.setColor(bgColor);
                 g.fillRect(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-
                 // Draw cell border
                 g.setColor(Color.BLACK);
                 g.drawRect(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-
                 // Draw piece ID letter
                 if (cellChar != '.') {
                     g.setColor(Color.BLACK);
@@ -82,7 +83,6 @@ public class BoardPanel extends JPanel {
                     int y = r * CELL_SIZE + (CELL_SIZE + textHeight) / 2 - 4;
                     g.drawString(text, x, y);
                 }
-
                 // Mark exit cell with a thicker border
                 if ((r == board.getExitRow() && c == board.getExitCol()) &&
                     (board.getExitCol() == board.getWidth() - 1 || board.getExitRow() == board.getHeight() - 1)) {

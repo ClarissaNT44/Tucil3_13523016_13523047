@@ -39,7 +39,6 @@ public class ControlPanel extends JPanel {
         this.pauseAction = v -> pauseCallback.run();
         this.prevAction = v -> prevCallback.run();
         this.nextAction = v -> nextCallback.run();
-
         initComponents();
         layoutComponents();
     }
@@ -47,10 +46,8 @@ public class ControlPanel extends JPanel {
     private void initComponents() {
         filePathField = new JTextField(30);
         filePathField.setEditable(false);
-
         browseButton = new JButton("Browse");
         browseButton.addActionListener(e -> browseAction.accept(null));
-
         algorithmComboBox = new JComboBox<>(new String[] {
                 "Uniform Cost Search (UCS)",
                 "Greedy Best First Search (GBFS)",
@@ -60,29 +57,23 @@ public class ControlPanel extends JPanel {
             int idx = algorithmComboBox.getSelectedIndex();
             heuristicComboBox.setEnabled(idx == 1 || idx == 2);
         });
-
         heuristicComboBox = new JComboBox<>(new String[] {
                 "Distance to Exit",
                 "Blocking Vehicles",
                 "Combined (Distance + Blocking Vehicles)"
         });
         heuristicComboBox.setEnabled(false);
-
         solveButton = new JButton("Solve");
         solveButton.addActionListener(e -> solveAction.accept(null));
-
         playButton = new JButton("Play");
         playButton.setEnabled(false);
         playButton.addActionListener(e -> playAction.accept(null));
-
         pauseButton = new JButton("Pause");
         pauseButton.setEnabled(false);
         pauseButton.addActionListener(e -> pauseAction.accept(null));
-
         prevButton = new JButton("Prev");
         prevButton.setEnabled(false);
         prevButton.addActionListener(e -> prevAction.accept(null));
-
         nextButton = new JButton("Next");
         nextButton.setEnabled(false);
         nextButton.addActionListener(e -> nextAction.accept(null));
