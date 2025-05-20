@@ -10,9 +10,7 @@ import java.awt.Graphics2D;
 import java.awt.Stroke;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.swing.JPanel;
-
 import model.Board;
 
 /**
@@ -54,6 +52,9 @@ public class BoardPanel extends JPanel {
         if (board == null) return;
         int width = board.getWidth();
         int height = board.getHeight();
+
+        Graphics2D g2 = (Graphics2D) g;
+        Stroke oldStroke = g2.getStroke();
         // Draw cells
         for (int r = 0; r < height; r++) {
             for (int c = 0; c < width; c++) {
@@ -83,17 +84,33 @@ public class BoardPanel extends JPanel {
                     int y = r * CELL_SIZE + (CELL_SIZE + textHeight) / 2 - 4;
                     g.drawString(text, x, y);
                 }
-                // Mark exit cell with a thicker border
-                if ((r == board.getExitRow() && c == board.getExitCol()) &&
-                    (board.getExitCol() == board.getWidth() - 1 || board.getExitRow() == board.getHeight() - 1)) {
-                    Graphics2D g2 = (Graphics2D) g;
-                    Stroke oldStroke = g2.getStroke();
-                    g2.setStroke(new BasicStroke(3));
-                    g2.setColor(Color.GREEN.darker());
-                    g2.drawRect(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-                    g2.setStroke(oldStroke);
-                }
             }
         }
+        int exitRow = board.getExitRow();
+        int exitCol = board.getExitCol();
+        g2.setStroke(new BasicStroke(5));
+        g2.setColor(Color.GREEN.darker());
+        if (exitRow >= 0 && exitRow < height && exitCol == -1) {
+            // Exit di tepi kiri papan pada baris exitRow
+            int x = 0;
+            int y = exitRow * CELL_SIZE;
+            g2.drawLine(x, y, x, y + CELL_SIZE);
+        } else if (exitRow >= 0 && exitRow < height && exitCol == width) {
+            // Exit di tepi kanan papan pada baris exitRow
+            int x = width * CELL_SIZE - 1;
+            int y = exitRow * CELL_SIZE;
+            g2.drawLine(x, y, x, y + CELL_SIZE);
+        } else if (exitCol >= 0 && exitCol < width && exitRow == -1) {
+            // Exit di tepi atas papan pada kolom exitCol
+            int x = exitCol * CELL_SIZE;
+            int y = 0;
+            g2.drawLine(x, y, x + CELL_SIZE, y);
+        } else if (exitCol >= 0 && exitCol < width && exitRow == height) {
+            // Exit di tepi bawah papan pada kolom exitCol
+            int x = exitCol * CELL_SIZE;
+            int y = height * CELL_SIZE - 1;
+            g2.drawLine(x, y, x + CELL_SIZE, y);
+        }
+        g2.setStroke(oldStroke);
     }
 }
