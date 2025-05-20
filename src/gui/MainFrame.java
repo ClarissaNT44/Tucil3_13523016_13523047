@@ -1,9 +1,15 @@
 package gui;
 
+import algorithm.AStar;
+import algorithm.GreedyBestFirst;
+import algorithm.HeuristicFactory;
+import algorithm.Pathfinder;
+import algorithm.UCS;
 import java.awt.BorderLayout;
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
-
+import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -12,21 +18,10 @@ import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.Timer;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.JButton;
-import java.io.IOException;
-
-import algorithm.AStar;
-import algorithm.GreedyBestFirst;
-import algorithm.HeuristicFactory;
-import algorithm.Pathfinder;
-import algorithm.UCS;
 import model.Board;
 import model.Move;
 import utility.FileHandler;
 
-/**
- * JFrame utama aplikasi GUI Rush Hour Solver.
- */
 public class MainFrame extends JFrame {
     private ControlPanel controlPanel;
     private BoardPanel boardPanel;
@@ -39,9 +34,9 @@ public class MainFrame extends JFrame {
 
     private Timer animationTimer;
     private int animationStep = 0;
+
     private JButton saveButton;
-    
-    // Variabel untuk tracking execution time
+
     private long startTime;
     private long endTime;
 
@@ -52,31 +47,28 @@ public class MainFrame extends JFrame {
         setSize(900, 700);
         setLocationRelativeTo(null);
 
-        // Inisialisasi tombol Save Solution
+        // Tombol Save
         saveButton = new JButton("Save Solution");
         saveButton.setEnabled(false);
         saveButton.addActionListener(e -> onSaveClicked());
-        
-        // Inisialisasi panel kontrol dengan callback methods
+
+        // Inisialisasi panel kontrol, operasikan callback dan tombol Save
         controlPanel = new ControlPanel(this::onBrowseClicked, this::onSolveClicked,
                 this::onPlayClicked, this::onPauseClicked,
-                this::onPrevClicked, this::onNextClicked);
-        
-        // Tambahkan tombol Save ke panel kontrol
-        controlPanel.add(saveButton);
+                this::onPrevClicked, this::onNextClicked, saveButton);
 
-        // Inisialisasi panel board dan status
         boardPanel = new BoardPanel();
-        statusPanel = new StatusPanel();
-        
-        // Tambahkan semua panel ke frame
+
+        // Inisialisasi StatusPanel dengan callback tombol Prev, Next, Save
+        statusPanel = new StatusPanel(this::onPrevClicked, this::onNextClicked, this::onSaveClicked);
+
+        // Tambahkan komponen ke frame
         add(controlPanel, BorderLayout.NORTH);
         add(new JScrollPane(boardPanel), BorderLayout.CENTER);
         add(statusPanel, BorderLayout.SOUTH);
-        
-        // Inisialisasi timer untuk animasi
+
         animationTimer = new Timer(800, e -> {
-            if (animationStep < boardStates.size() - 1) {
+            if (boardStates != null && animationStep < boardStates.size() - 1) {
                 animationStep++;
                 updateBoardState(animationStep);
             } else {
@@ -85,29 +77,24 @@ public class MainFrame extends JFrame {
             }
         });
     }
-    
-    /**
-     * Handler untuk tombol Save Solution.
-     * Menyimpan solusi saat ini ke file teks yang dipilih pengguna.
-     */
+
     private void onSaveClicked() {
         if (solutionMoves == null || solutionMoves.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "No solution to save!",
-                    "Warning", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "No solution to save!", "Warning", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        
+
         JFileChooser chooser = new JFileChooser();
         chooser.setFileFilter(new FileNameExtensionFilter("Text Files", "txt"));
         chooser.setDialogTitle("Save Solution");
         int result = chooser.showSaveDialog(this);
-        
+
         if (result == JFileChooser.APPROVE_OPTION) {
             String filePath = chooser.getSelectedFile().getAbsolutePath();
             if (!filePath.endsWith(".txt")) {
                 filePath += ".txt";
             }
-            
+
             try {
                 long timeTaken = endTime - startTime;
                 FileHandler.saveSolutionToFile(solutionMoves, boardStates, filePath, timeTaken, pathfinder.getNodesVisited());
@@ -120,10 +107,6 @@ public class MainFrame extends JFrame {
         }
     }
 
-    /**
-     * Handler untuk tombol Browse.
-     * Membuka dialog file picker untuk memilih file puzzle.
-     */
     private void onBrowseClicked() {
         JFileChooser chooser = new JFileChooser();
         chooser.setFileFilter(new FileNameExtensionFilter("Text Files", "txt"));
@@ -143,22 +126,16 @@ public class MainFrame extends JFrame {
         }
     }
 
-    /**
-     * Handler untuk tombol Solve.
-     * Memulai proses pencarian solusi dengan algoritma yang dipilih.
-     */
     private void onSolveClicked() {
         if (currentBoard == null) {
             JOptionPane.showMessageDialog(this, "Please load a puzzle file first.",
                     "Warning", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        
-        // Ambil pilihan algoritma dan heuristik dari control panel
+
         int algoIndex = controlPanel.getSelectedAlgorithmIndex();
         int heuristicIndex = controlPanel.getSelectedHeuristicIndex() + 1;
-        
-        // Buat objek pathfinder berdasarkan pilihan algoritma
+
         switch (algoIndex) {
             case 0:
                 pathfinder = new UCS();
@@ -174,17 +151,18 @@ public class MainFrame extends JFrame {
                         "Error", JOptionPane.ERROR_MESSAGE);
                 return;
         }
-        
-        // Update status dan disable controls selama pencarian
+
         statusPanel.setStatus("Solving...");
         controlPanel.setControlsEnabled(false);
         saveButton.setEnabled(false);
-        
-        // Jalankan pencarian solusi di background thread
+        statusPanel.setPrevEnabled(false);
+        statusPanel.setNextEnabled(false);
+        statusPanel.setSaveEnabled(false);
+
         SwingWorker<Void, Void> worker = new SwingWorker<>() {
             List<Move> solution;
             List<model.State> states;
-            
+
             @Override
             protected Void doInBackground() {
                 startTime = System.currentTimeMillis();
@@ -197,10 +175,10 @@ public class MainFrame extends JFrame {
             @Override
             protected void done() {
                 try {
-                    get(); // catch exceptions
+                    get();
                     solutionMoves = solution;
                     boardStates = states.stream().map(model.State::getBoard).toList();
-                    
+
                     if (solutionMoves.isEmpty()) {
                         statusPanel.setStatus("No solution found.");
                         JOptionPane.showMessageDialog(MainFrame.this, "No solution found!",
@@ -208,12 +186,15 @@ public class MainFrame extends JFrame {
                         resetAnimation();
                     } else {
                         statusPanel.setStatus("Solution found with " + solutionMoves.size() + " moves, nodes visited: " +
-                            pathfinder.getNodesVisited() + ", execution time: " + (endTime - startTime) + " ms");
+                                pathfinder.getNodesVisited() + ", execution time: " + (endTime - startTime) + " ms");
                         animationStep = 0;
                         boardPanel.setBoard(boardStates.get(0));
                         controlPanel.setControlsEnabled(true);
                         controlPanel.setPlaying(false);
-                        saveButton.setEnabled(true);  // Aktifkan tombol save
+                        saveButton.setEnabled(true);
+                        statusPanel.setPrevEnabled(false);
+                        statusPanel.setNextEnabled(boardStates.size() > 1);
+                        statusPanel.setSaveEnabled(true);
                     }
                 } catch (Exception e) {
                     JOptionPane.showMessageDialog(MainFrame.this, "Error during solving:\n" + e.getMessage(),
@@ -226,57 +207,42 @@ public class MainFrame extends JFrame {
         worker.execute();
     }
 
-    /**
-     * Handler untuk tombol Play.
-     * Memulai animasi solusi.
-     */
     private void onPlayClicked() {
         animationTimer.start();
         controlPanel.setPlaying(true);
+        // Disable prev/next saat play animasi
+        statusPanel.setPrevEnabled(false);
+        statusPanel.setNextEnabled(false);
     }
 
-    /**
-     * Handler untuk tombol Pause.
-     * Menghentikan animasi solusi sementara.
-     */
     private void onPauseClicked() {
         animationTimer.stop();
         controlPanel.setPlaying(false);
+        // Enable prev/next saat pause animasi jika ada lebih dari 1 step
+        statusPanel.setPrevEnabled(animationStep > 0);
+        statusPanel.setNextEnabled(boardStates != null && animationStep < boardStates.size() - 1);
     }
 
-    /**
-     * Handler untuk tombol Next.
-     * Menampilkan langkah selanjutnya dari solusi.
-     */
     private void onNextClicked() {
         if (boardStates == null || animationStep >= boardStates.size() - 1) return;
         animationStep++;
         updateBoardState(animationStep);
     }
 
-    /**
-     * Handler untuk tombol Previous.
-     * Menampilkan langkah sebelumnya dari solusi.
-     */
     private void onPrevClicked() {
         if (boardStates == null || animationStep <= 0) return;
         animationStep--;
         updateBoardState(animationStep);
     }
 
-    /**
-     * Memperbarui tampilan board dan status untuk langkah tertentu.
-     * 
-     * @param step Index langkah yang akan ditampilkan
-     */
     private void updateBoardState(int step) {
         boardPanel.setBoard(boardStates.get(step));
         statusPanel.setStatus("Step " + step + " / " + (boardStates.size() - 1));
+        // Update prev/next button enabled state
+        statusPanel.setPrevEnabled(step > 0);
+        statusPanel.setNextEnabled(step < boardStates.size() - 1);
     }
 
-    /**
-     * Reset status animasi dan kontrol GUI.
-     */
     private void resetAnimation() {
         animationTimer.stop();
         animationStep = 0;
@@ -284,7 +250,10 @@ public class MainFrame extends JFrame {
         boardStates = null;
         controlPanel.setControlsEnabled(true);
         controlPanel.setPlaying(false);
-        saveButton.setEnabled(false); // Disable tombol save
+        saveButton.setEnabled(false);
+        statusPanel.setPrevEnabled(false);
+        statusPanel.setNextEnabled(false);
+        statusPanel.setSaveEnabled(false);
         if (currentBoard != null) {
             boardPanel.setBoard(currentBoard);
         } else {
@@ -293,9 +262,6 @@ public class MainFrame extends JFrame {
         statusPanel.setStatus("Load a puzzle to start.");
     }
 
-    /**
-     * Entry point untuk aplikasi GUI.
-     */
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new MainFrame().setVisible(true));
     }
