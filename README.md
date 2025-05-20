@@ -27,7 +27,10 @@ This solver implements multiple pathfinding algorithms and heuristics to find th
    mkdir -p bin
    javac -d bin src/main/*.java src/main/algorithm/*.java src/main/model/*.java src/main/util/*.java
    ```
-
+5. Compile the Java files with GUI
+   ```
+   javac -d bin src/*.java src/algorithm/*.java src/model/*.java src/utility/*.java src/gui/*.java
+   ```
 ## Usage
 
 ### Running the Program
@@ -40,7 +43,10 @@ This solver implements multiple pathfinding algorithms and heuristics to find th
    ```
    java -jar target/rush-hour-solver.jar
    ```
-
+3. Running the program with GUI after compile
+   ```
+   java -cp bin gui.MainFrame
+   ```
 3. Follow the prompts to:
    - Enter the puzzle file path
    - Select the pathfinding algorithm

@@ -1,12 +1,16 @@
 package utility;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import model.Board;
+import model.Move;
 import model.Piece;
 
 public class FileHandler {
@@ -155,12 +159,16 @@ public class FileHandler {
         }
     }
 
-    public static void printBoard(Board board) {
+    public static void printBoard(Board board, char movingPieceId) {
         int height = board.getHeight();
         int width = board.getWidth();
         int exitRow = board.getExitRow();
         int exitCol = board.getExitCol();
-        
+       
+        final String RESET = "\u001B[0m";
+        final String RED = "\u001B[91m";
+        final String GREEN = "\u001B[92m";
+
         System.out.print("+");
         for (int c = 0; c < width; c++) {
             if (exitRow == -1 && exitCol == c) {
@@ -180,14 +188,17 @@ public class FileHandler {
             
             for (int c = 0; c < width; c++) {
                 char cell = board.getCell(r, c);
-                System.out.print(" " + cell + " ");
-                
-                if (c == width - 1) {
-                    if (exitCol == width && exitRow == r) {
-                        System.out.print(" ");  
-                    } else {
-                        System.out.print("|");
-                    }
+              
+                String color = "";
+                if (cell == movingPieceId) {
+                    color = GREEN; 
+                } else if (cell == 'P') {
+                    color = RED; 
+                }
+                System.out.print(" " + color + cell + RESET + " ");
+                if (c == width - 1 && r == exitRow) {
+                    System.out.print(" ");
+
                 } else {
                     System.out.print("|");
                 }
@@ -202,6 +213,74 @@ public class FileHandler {
                 }
             }
             System.out.println();
+        }
+    }
+
+    public static void saveSolutionToFile(List<Move> solution, List<Board> boardStates, String filePath, long timeTaken, int nodesVisited) throws IOException {
+        // Ensure the file has .txt extension
+        if (!filePath.endsWith(".txt")) {
+            throw new IOException("Invalid file format. The file must be a .txt file.");
+        }
+        
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+            writer.write("============================================");
+            writer.write("\n              SOLUTION FOUND");
+            writer.write("\n============================================");
+            if (solution.isEmpty()) {
+                writer.write("\nNo solution found.");
+                return;
+            } else {
+                writer.write("\nSolution path contains " + solution.size() + " moves.\n");
+            }
+            // Write the solution steps
+            writer.write("Step by step solution:\n");
+            for (int i = 0; i < solution.size(); i++) {
+                Move move = solution.get(i);
+                writer.write("\nStep " + (i + 1) + ": " + move + "\n");
+                Board currentBoard = boardStates.get(i);
+                int height = currentBoard.getHeight();
+                int width = currentBoard.getWidth();
+                int exitRow = currentBoard.getExitRow();
+                int exitCol = currentBoard.getExitCol();
+                
+                // Print top border
+                writer.write("+");
+                for (int c = 0; c < width; c++) {
+                    writer.write("---+");
+                }
+                writer.write("\n");
+
+                // Print board rows
+                for (int r = 0; r < height; r++) {
+                    writer.write("|");
+                    for (int c = 0; c < width; c++) {
+                        char cell = currentBoard.getCell(r, c);
+                        writer.write(" " + cell + " ");
+                        // Right border - only leave it open if this is the exit position
+                        if (c == width - 1 && r == exitRow) {
+                            writer.write(" ");
+                        } else {
+                            writer.write("|");
+                        }
+                    }
+                    writer.write("\n");
+                    // Print row separator (bottom border for this row)
+                    writer.write("+");
+                    for (int c = 0; c < width; c++) {
+                        writer.write("---+");
+                    }
+                    writer.write("\n");
+                }
+            }
+            
+            // Write the statistics in the format you requested
+            writer.write("\n============================================\n");
+            writer.write("               STATISTICS\n");
+            writer.write("============================================\n");
+            writer.write("Path length: " + solution.size() + " moves\n");
+            writer.write("Nodes visited: " + nodesVisited + "\n");
+            writer.write("Execution time: " + timeTaken + " ms\n");
+            writer.write("============================================\n");
         }
     }
 }
