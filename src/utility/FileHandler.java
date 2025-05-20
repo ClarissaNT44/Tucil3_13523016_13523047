@@ -15,7 +15,6 @@ public class FileHandler {
         String line;
         
         try {
-            // Read board dimensions
             line = reader.readLine();
             if (line == null) {
                 throw new IOException("File is empty or incomplete");
@@ -29,93 +28,102 @@ public class FileHandler {
             int width = Integer.parseInt(dimensions[0]);
             int height = Integer.parseInt(dimensions[1]);
             
-            // Skip the number of pieces line (not needed for grid format)
             line = reader.readLine();
             
-            // Create the board
-            Board board = new Board(width, height);
-            
-            // Read the grid representation
-            char[][] grid = new char[height][width];
-            for (int r = 0; r < height; r++) {
-                line = reader.readLine();
-                if (line == null || line.length() < width) {
-                    throw new IOException("Invalid grid row " + (r + 1) + ": insufficient length");
-                }
-                for (int c = 0; c < width; c++) {
-                    grid[r][c] = line.charAt(c);
-                }
-            }
-            
-            // Find exit position (marked by 'K')
             int exitRow = -1;
             int exitCol = -1;
+            String[] allLines = new String[height + 2]; 
+            int lineCount = 0;
+            int gridStartIndex = -1;
             
-            // First, find the primary piece position (P)
-            int primaryRow = -1;
-            
-            for (int r = 0; r < height; r++) {
-                for (int c = 0; c < width; c++) {
-                    if (grid[r][c] == 'P') {
-                        primaryRow = r;
-                        break;
-                    }
-                }
-                if (primaryRow >= 0) break;
+            while ((line = reader.readLine()) != null && lineCount < height + 2) {
+                allLines[lineCount++] = line;
             }
             
-            // Now find 'K' in the same row as 'P'
-            if (primaryRow >= 0) {
-                for (int c = 0; c < width; c++) {
-                    if (grid[primaryRow][c] == 'K') {
-                        exitRow = primaryRow;
-                        exitCol = c;
-                        // Replace 'K' with '.' since it's not a piece
-                        grid[exitRow][exitCol] = '.';
-                        break;
-                    }
-                }
-            }
-            
-            // If 'K' not found in the same row, look elsewhere
-            if (exitRow < 0) {
-                for (int r = 0; r < height; r++) {
-                    for (int c = 0; c < width; c++) {
-                        if (grid[r][c] == 'K') {
-                            exitRow = r;
-                            exitCol = c;
-                            // Replace 'K' with '.' since it's not a piece
-                            grid[r][c] = '.';
-                            break;
+            for (int i = 0; i < lineCount; i++) {
+                String currentLine = allLines[i];
+                int kPos = currentLine.indexOf('K');
+                
+                if (kPos >= 0) {
+                    if (i == 0) {
+                        exitRow = -1;
+                        gridStartIndex = 1; 
+                        
+                        exitCol = kPos;
+                        System.out.println("DEBUG: K found above grid at column position " + kPos); 
+                        
+                    } else if (i >= height) {
+                        exitRow = height;
+                        
+                        exitCol = kPos;
+                        System.out.println("DEBUG: K found below grid at column position " + kPos);
+                        
+                    } else {
+                        exitRow = i - (gridStartIndex == -1 ? 0 : gridStartIndex);
+                        
+                        int colBeforeK = 0;
+                        for (int c = 0; c < kPos; c++) {
+                            if (currentLine.charAt(c) != ' ') {
+                                colBeforeK++;
+                            }
+                        }
+                        
+                        if (colBeforeK == 0) {
+                            exitCol = -1;
+                        } else if (colBeforeK >= width) {
+                            exitCol = width;
+                        } else {
+                            exitCol = colBeforeK - 1;
                         }
                     }
-                    if (exitRow >= 0) break;
+                    
+                    allLines[i] = allLines[i].replace("K", "");
+                    break;
                 }
             }
             
-            // Set default exit if 'K' was not found
-            if (exitRow < 0) {
-                // Default exit is at the right edge of the row with the primary piece
-                exitRow = (primaryRow >= 0) ? primaryRow : height / 2;
-                exitCol = width - 1;
+            if (exitRow == -1 && exitCol == -1) {
+                throw new IOException("No exit position (K) found in the puzzle");
+            }
+            if (gridStartIndex == -1) {
+                gridStartIndex = 0;
             }
             
-            // Set the exit position
+            char[][] grid = new char[height][width];
+            for (int r = 0; r < height; r++) {
+                for (int c = 0; c < width; c++) {
+                    grid[r][c] = '.';
+                }
+            }
+            
+            for (int r = 0; r < height; r++) {
+                if (gridStartIndex + r >= lineCount) {
+                    break; 
+                }
+                
+                String currentLine = allLines[gridStartIndex + r];
+                
+                int gridCol = 0;
+                for (int c = 0; c < currentLine.length() && gridCol < width; c++) {
+                    char ch = currentLine.charAt(c);
+                    if (ch != ' ') {
+                        grid[r][gridCol++] = ch;
+                    }
+                }
+            }
+            
+            Board board = new Board(width, height);
             board.setExit(exitRow, exitCol);
             
-            // Map from ID to information: [startRow, startCol, endRow, endCol]
             Map<Character, int[]> pieceBounds = new HashMap<>();
             
-            // Find all pieces and their boundaries
             for (int r = 0; r < height; r++) {
                 for (int c = 0; c < width; c++) {
                     char id = grid[r][c];
                     if (id != '.') {
                         if (!pieceBounds.containsKey(id)) {
-                            // Initialize with [startRow, startCol, endRow, endCol]
                             pieceBounds.put(id, new int[] {r, c, r, c});
                         } else {
-                            // Update the end positions
                             int[] bounds = pieceBounds.get(id);
                             bounds[2] = Math.max(bounds[2], r);
                             bounds[3] = Math.max(bounds[3], c);
@@ -124,7 +132,6 @@ public class FileHandler {
                 }
             }
             
-            // Create pieces from boundaries
             for (Map.Entry<Character, int[]> entry : pieceBounds.entrySet()) {
                 char id = entry.getKey();
                 int[] bounds = entry.getValue();
@@ -136,8 +143,6 @@ public class FileHandler {
                 
                 boolean isHorizontal = (startRow == endRow);
                 int length = isHorizontal ? (endCol - startCol + 1) : (endRow - startRow + 1);
-                
-                // Determine if this is the primary piece (P)
                 boolean isPrimary = (id == 'P');
                 
                 Piece piece = new Piece(id, startRow, startCol, length, isHorizontal, isPrimary);
@@ -156,33 +161,45 @@ public class FileHandler {
         int exitRow = board.getExitRow();
         int exitCol = board.getExitCol();
         
-        // Print top border
         System.out.print("+");
         for (int c = 0; c < width; c++) {
-            System.out.print("---+");
+            if (exitRow == -1 && exitCol == c) {
+                System.out.print("   +");
+            } else {
+                System.out.print("---+");
+            }
         }
         System.out.println();
         
-        // Print board rows
         for (int r = 0; r < height; r++) {
-            System.out.print("|");
+            if (exitCol == -1 && exitRow == r) {
+                System.out.print(" ");  
+            } else {
+                System.out.print("|");
+            }
+            
             for (int c = 0; c < width; c++) {
                 char cell = board.getCell(r, c);
                 System.out.print(" " + cell + " ");
                 
-                // Right border - only leave it open if this is the exit position
-                if (c == width - 1 && r == exitRow) {
-                    System.out.print(" ");
+                if (c == width - 1) {
+                    if (exitCol == width && exitRow == r) {
+                        System.out.print(" ");  
+                    } else {
+                        System.out.print("|");
+                    }
                 } else {
                     System.out.print("|");
                 }
             }
             System.out.println();
-            
-            // Print row separator (bottom border for this row)
             System.out.print("+");
             for (int c = 0; c < width; c++) {
-                System.out.print("---+");
+                if (r == height - 1 && exitRow == height && exitCol == c) {
+                    System.out.print("   +"); 
+                } else {
+                    System.out.print("---+");
+                }
             }
             System.out.println();
         }

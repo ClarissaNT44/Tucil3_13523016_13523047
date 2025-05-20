@@ -2,35 +2,26 @@ import algorithm.*;
 import model.*;
 import utility.*;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
 import java.util.Scanner;
 
-/**
- * Main class for the Rush Hour puzzle solver application.
- */
 public class Main {
     public static void main(String[] args) {
         System.out.println("============================================");
         System.out.println("        RUSH HOUR PUZZLE SOLVER");
         System.out.println("============================================");
 
-        // Ask user for the puzzle file
         Scanner scanner = new Scanner(System.in);
         System.out.print("Enter the puzzle file path: ");
         String filePath = scanner.nextLine();
         
         try {
-            // Load the puzzle from file
             Board board = FileHandler.loadBoardFromFile(filePath);
-            
-            // Display the initial board
+                        
             System.out.println("\nInitial Board:");
             FileHandler.printBoard(board);
             
-            // Ask user for the algorithm choice
             System.out.println("\nSelect the search algorithm:");
             System.out.println("1. Uniform Cost Search (UCS)");
             System.out.println("2. Greedy Best First Search (GBFS)");
@@ -40,7 +31,6 @@ public class Main {
             int algorithmChoice = scanner.nextInt();
             Pathfinder pathfinder;
             
-            // If choosing GBFS or A*, ask for heuristic
             int heuristicChoice = 0;
             if (algorithmChoice == 2 || algorithmChoice == 3) {
                 System.out.println("\nSelect heuristic:");
@@ -51,7 +41,6 @@ public class Main {
                 heuristicChoice = scanner.nextInt();
             }
             
-            // Create the selected pathfinder
             long startTime = System.currentTimeMillis();
             switch (algorithmChoice) {
                 case 1:
@@ -69,11 +58,9 @@ public class Main {
                     throw new IllegalArgumentException("Invalid algorithm choice");
             }
             
-            // Execute search
             List<Move> solution = pathfinder.findPath(board);
             long endTime = System.currentTimeMillis();
             
-            // Display results
             System.out.println("\n============================================");
             System.out.println("              SOLUTION FOUND");
             System.out.println("============================================");
@@ -83,12 +70,10 @@ public class Main {
             } else {
                 System.out.println("Solution path contains " + solution.size() + " moves:");
                 
-                // Apply each move to the board and display steps
                 Board currentBoard = board.copy();
                 System.out.println("\nInitial state:");
                 FileHandler.printBoard(currentBoard);
                 
-                // Display each step
                 System.out.println("\nStep by step solution:");
                 for (int i = 0; i < solution.size(); i++) {
                     Move move = solution.get(i);
@@ -114,93 +99,4 @@ public class Main {
             scanner.close();
         }
     }
-    
-    /**
-     * Loads a puzzle board from a file.
-     * 
-     * @param filePath Path to the puzzle file
-     * @return The loaded board
-     * @throws IOException If file reading fails
-     */
-    // private static Board loadBoardFromFile(String filePath) throws IOException {
-    //     BufferedReader reader = new BufferedReader(new FileReader(filePath));
-    //     String line;
-        
-    //     // Read board dimensions
-    //     line = reader.readLine();
-    //     String[] dimensions = line.split(" ");
-    //     int width = Integer.parseInt(dimensions[0]);
-    //     int height = Integer.parseInt(dimensions[1]);
-        
-    //     Board board = new Board(width, height);
-        
-    //     // Read exit position
-    //     line = reader.readLine();
-    //     String[] exitPos = line.split(" ");
-    //     int exitRow = Integer.parseInt(exitPos[0]);
-    //     int exitCol = Integer.parseInt(exitPos[1]);
-    //     board.setExit(exitRow, exitCol);
-        
-    //     // Read number of pieces
-    //     int numPieces = Integer.parseInt(reader.readLine());
-        
-    //     // Read each piece
-    //     for (int i = 0; i < numPieces; i++) {
-    //         line = reader.readLine();
-    //         String[] pieceData = line.split(" ");
-            
-    //         char id = pieceData[0].charAt(0);
-    //         int row = Integer.parseInt(pieceData[1]);
-    //         int col = Integer.parseInt(pieceData[2]);
-    //         int length = Integer.parseInt(pieceData[3]);
-    //         boolean isHorizontal = Integer.parseInt(pieceData[4]) == 0;
-    //         boolean isPrimary = Integer.parseInt(pieceData[5]) == 1;
-            
-    //         Piece piece = new Piece(id, row, col, length, isHorizontal, isPrimary);
-    //         board.addPiece(piece);
-    //     }
-        
-    //     reader.close();
-    //     return board;
-    // }
-    
-    /**
-     * Prints the board in a readable format.
-     * 
-     * @param board The board to print
-     */
-    // private static void printBoard(Board board) {
-    //     int height = board.getHeight();
-    //     int width = board.getWidth();
-        
-    //     // Print top border
-    //     System.out.print("+");
-    //     for (int c = 0; c < width; c++) {
-    //         System.out.print("---+");
-    //     }
-    //     System.out.println();
-        
-    //     // Print board rows
-    //     for (int r = 0; r < height; r++) {
-    //         System.out.print("|");
-    //         for (int c = 0; c < width; c++) {
-    //             char cell = board.getCell(r, c);
-    //             System.out.print(" " + cell + " |");
-    //         }
-    //         System.out.println();
-            
-    //         // Print row separator
-    //         System.out.print("+");
-    //         for (int c = 0; c < width; c++) {
-    //             // Mark the exit
-    //             if ((r == board.getExitRow() && (c == 0 || c == width - 1)) || 
-    //                 (c == board.getExitCol() && (r == 0 || r == height - 1))) {
-    //                 System.out.print("   +");
-    //             } else {
-    //                 System.out.print("---+");
-    //             }
-    //         }
-    //         System.out.println();
-    //     }
-    // }
 }
