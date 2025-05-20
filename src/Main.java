@@ -1,7 +1,17 @@
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
 
-import algorithm.*;
-import model.*;
-import utility.*;
+import algorithm.AStar;
+import algorithm.GreedyBestFirst;
+import algorithm.Heuristic;
+import algorithm.HeuristicFactory;
+import algorithm.Pathfinder;
+import algorithm.UCS;
+import model.Board;
+import model.Move;
+import utility.FileHandler;
 
 public class Main {
     public static void main(String[] args) {
@@ -67,9 +77,11 @@ public class Main {
             } else {
                 System.out.println("Solution path contains " + solution.size() + " moves:");
                 
+                List<Board> boardStates = new ArrayList<>();
+                boardStates.add(board.copy());
                 Board currentBoard = board.copy();
                 System.out.println("\nInitial state:");
-                FileHandler.printBoard(currentBoard);
+                FileHandler.printBoard(currentBoard, ' ');
 
                 System.out.println("\nStep by step solution:");
                 for (int i = 0; i < solution.size(); i++) {
