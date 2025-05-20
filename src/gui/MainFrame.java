@@ -47,22 +47,16 @@ public class MainFrame extends JFrame {
         setSize(900, 700);
         setLocationRelativeTo(null);
 
-        // Tombol Save
         saveButton = new JButton("Save Solution");
         saveButton.setEnabled(false);
         saveButton.addActionListener(e -> onSaveClicked());
-
-        // Inisialisasi panel kontrol, operasikan callback dan tombol Save
         controlPanel = new ControlPanel(this::onBrowseClicked, this::onSolveClicked,
                 this::onPlayClicked, this::onPauseClicked,
                 this::onPrevClicked, this::onNextClicked, saveButton);
 
         boardPanel = new BoardPanel();
-
-        // Inisialisasi StatusPanel dengan callback tombol Prev, Next, Save
         statusPanel = new StatusPanel(this::onPrevClicked, this::onNextClicked, this::onSaveClicked);
 
-        // Tambahkan komponen ke frame
         add(controlPanel, BorderLayout.NORTH);
         add(new JScrollPane(boardPanel), BorderLayout.CENTER);
         add(statusPanel, BorderLayout.SOUTH);
@@ -210,7 +204,6 @@ public class MainFrame extends JFrame {
     private void onPlayClicked() {
         animationTimer.start();
         controlPanel.setPlaying(true);
-        // Disable prev/next saat play animasi
         statusPanel.setPrevEnabled(false);
         statusPanel.setNextEnabled(false);
     }
@@ -218,7 +211,6 @@ public class MainFrame extends JFrame {
     private void onPauseClicked() {
         animationTimer.stop();
         controlPanel.setPlaying(false);
-        // Enable prev/next saat pause animasi jika ada lebih dari 1 step
         statusPanel.setPrevEnabled(animationStep > 0);
         statusPanel.setNextEnabled(boardStates != null && animationStep < boardStates.size() - 1);
     }
@@ -238,7 +230,6 @@ public class MainFrame extends JFrame {
     private void updateBoardState(int step) {
         boardPanel.setBoard(boardStates.get(step));
         statusPanel.setStatus("Step " + step + " / " + (boardStates.size() - 1));
-        // Update prev/next button enabled state
         statusPanel.setPrevEnabled(step > 0);
         statusPanel.setNextEnabled(step < boardStates.size() - 1);
     }

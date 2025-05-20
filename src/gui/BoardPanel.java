@@ -13,9 +13,6 @@ import java.util.Map;
 import javax.swing.JPanel;
 import model.Board;
 
-/**
- * Panel untuk menampilkan papan puzzle Rush Hour sebagai grid.
- */
 public class BoardPanel extends JPanel {
     private Board board;
     private static final int CELL_SIZE = 50;
@@ -55,7 +52,6 @@ public class BoardPanel extends JPanel {
 
         Graphics2D g2 = (Graphics2D) g;
         Stroke oldStroke = g2.getStroke();
-        // Draw cells
         for (int r = 0; r < height; r++) {
             for (int c = 0; c < width; c++) {
                 char cellChar = board.getCell(r, c);
@@ -69,10 +65,8 @@ public class BoardPanel extends JPanel {
                 }
                 g.setColor(bgColor);
                 g.fillRect(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-                // Draw cell border
                 g.setColor(Color.BLACK);
                 g.drawRect(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-                // Draw piece ID letter
                 if (cellChar != '.') {
                     g.setColor(Color.BLACK);
                     g.setFont(g.getFont().deriveFont(Font.BOLD, 20f));
@@ -91,22 +85,18 @@ public class BoardPanel extends JPanel {
         g2.setStroke(new BasicStroke(5));
         g2.setColor(Color.GREEN.darker());
         if (exitRow >= 0 && exitRow < height && exitCol == -1) {
-            // Exit di tepi kiri papan pada baris exitRow
             int x = 0;
             int y = exitRow * CELL_SIZE;
             g2.drawLine(x, y, x, y + CELL_SIZE);
         } else if (exitRow >= 0 && exitRow < height && exitCol == width) {
-            // Exit di tepi kanan papan pada baris exitRow
             int x = width * CELL_SIZE - 1;
             int y = exitRow * CELL_SIZE;
             g2.drawLine(x, y, x, y + CELL_SIZE);
         } else if (exitCol >= 0 && exitCol < width && exitRow == -1) {
-            // Exit di tepi atas papan pada kolom exitCol
             int x = exitCol * CELL_SIZE;
             int y = 0;
             g2.drawLine(x, y, x + CELL_SIZE, y);
         } else if (exitCol >= 0 && exitCol < width && exitRow == height) {
-            // Exit di tepi bawah papan pada kolom exitCol
             int x = exitCol * CELL_SIZE;
             int y = height * CELL_SIZE - 1;
             g2.drawLine(x, y, x + CELL_SIZE, y);

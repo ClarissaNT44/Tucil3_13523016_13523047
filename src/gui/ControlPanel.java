@@ -8,9 +8,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-/**
- * Panel kontrol yang berisi input file, pilihan algoritma, heuristic, dan tombol animasi.
- */
 public class ControlPanel extends JPanel {
     private JTextField filePathField;
     private JButton browseButton;
@@ -22,7 +19,7 @@ public class ControlPanel extends JPanel {
     private JButton prevButton;
     private JButton nextButton;
 
-    // Tambahan: tombol Save disimpan agar mudah di-manage
+    
     private JButton saveButton;
 
     private Consumer<Void> browseAction;
@@ -105,15 +102,13 @@ public class ControlPanel extends JPanel {
         add(prevButton);
         add(nextButton);
 
-        // Jika tombol Save sudah di-set, tambahkan juga
+        
         if (saveButton != null) {
             add(saveButton);
         }
     }
 
-    /**
-     * Tambahkan tombol Save ke panel.
-     */
+    
     public void addSaveButton(JButton button) {
         this.saveButton = button;
         add(saveButton);
@@ -140,7 +135,7 @@ public class ControlPanel extends JPanel {
         prevButton.setEnabled(enabled);
         nextButton.setEnabled(enabled);
 
-        // Save button ikut disable kalau controls disable
+        
         if (saveButton != null) {
             saveButton.setEnabled(enabled);
         }
